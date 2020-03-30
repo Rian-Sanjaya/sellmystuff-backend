@@ -1,6 +1,10 @@
 const fs = require('fs');
 const Thing = require('../models/thing');
 
+// const environment = process.env.NODE_ENV || 'development';
+const environment = process.env.NODE_ENV;
+console.log(`environment: ${environment}`)
+
 exports.createThing = (req, res, next) => {
     // console.log('isi req', req.body);
     // console.log('isi file: ', req.file)
@@ -14,7 +18,11 @@ exports.createThing = (req, res, next) => {
     // we use req.protocol to get the first segment ( 'http' , in this case); we add the '://', 
     // and then use req.get('host') to resolve the server host ('localhost:3000' in this case); 
     // we finally add '/images/' and the filename to complete our URL
-    const url = req.protocol + '://' + req.get('host');
+    let url = ''
+    if (process.env.NODE_ENV === 'production')
+        url = 'https://' + req.get('host');
+    else
+        url = req.protocol + '://' + req.get('host');
     // console.log(url);
     // console.log(req.file.filename);
     const thing = new Thing({
