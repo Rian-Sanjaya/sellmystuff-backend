@@ -3,7 +3,6 @@ const Thing = require('../models/thing');
 
 // const environment = process.env.NODE_ENV || 'development';
 const environment = process.env.NODE_ENV;
-console.log(`environment: ${environment}`)
 
 exports.createThing = (req, res, next) => {
     // console.log('isi req', req.body);
@@ -56,53 +55,22 @@ exports.getOneThing = (req, res, next) => {
     });
 };
 
-// exports.modifyThing = (req, res, next) => {
-//     let thing = new Thing({ _id: req.params._id });
-//     if (req.file) {
-//       const url = req.protocol + '://' + req.get('host');
-//       req.body.thing = JSON.parse(req.body.thing);
-//       thing = {
-//         _id: req.params.id,
-//         title: req.body.thing.title,
-//         description: req.body.thing.description,
-//         imageUrl: url + '/images/' + req.file.filename,
-//         price: req.body.thing.price,
-//         userId: req.body.thing.userId
-//       };
-//     } else {
-//       thing = {
-//         _id: req.params.id,
-//         title: req.body.title,
-//         description: req.body.description,
-//         imageUrl: req.body.imageUrl,
-//         price: req.body.price,
-//         userId: req.body.userId
-//       };
-//     }
-//     Thing.updateOne({_id: req.params.id}, thing).then(
-//       () => {
-//         res.status(201).json({
-//           message: 'Thing updated successfully!'
-//         });
-//       }
-//     ).catch(
-//       (error) => {
-//         res.status(400).json({
-//           error: error
-//         });
-//       }
-//     );
-//   };
-
 exports.modifyThing = (req, res, next) => {
     // we first create a new instance of our Thing model with the received _id 
     // so as not to cause problems when trying to update that Thing in the database
     let thing = new Thing({ _id: req.params._id });
-    // console.log(thing);
+    
+    req.body.thing = JSON.parse(req.body.thing);
+
     // if we receive a new file with the request (via multer), we handle the form-data and generate the image URL
     if (req.file) {
-        const url = req.protocol + '://' + req.get('host');
-        req.body.thing = JSON.parse(req.body.thing);
+        // const url = req.protocol + '://' + req.get('host');
+        let url = ''
+        if (process.env.NODE_ENV === 'production')
+            url = 'https://' + req.get('host');
+        else
+            url = req.protocol + '://' + req.get('host');
+        
         // console.log(req.body.thing);
         thing = {
             _id: req.params.id,
@@ -118,13 +86,13 @@ exports.modifyThing = (req, res, next) => {
         // Using the new keyword with a Mongoose model creates a new _id field by default. 
         // In this case, that would throw an error, as we would be trying to modify an immutable field on a database document. 
         // Therefore, we must use the id parameter from the request to set our Thing up with the same _id as before
+        // console.log('isi title: ', req.body.thing.title);
         thing = {
             _id: req.params.id,
-            title: req.body.title,
-            description: req.body.description,
-            imageUrl: req.body.imageUrl,
-            price: req.body.price,
-            userId: req.body.userId
+            title: req.body.thing.title,
+            description: req.body.thing.description,
+            price: req.body.thing.price,
+            userId: req.body.thing.userId
         };
     }
 
